@@ -233,7 +233,7 @@ router.post("/api/users/verify", async (context) => {
     context.response.status = 200;
     context.response.body = {
       success: true,
-      user: { user }
+      user: sanitize(user)
     };
   } catch (error) {
     context.response.status = 400;
