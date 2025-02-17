@@ -1,7 +1,7 @@
-import UserModel, { DiscordUser, UserSchema } from "../database/models/user.ts";
-import { Router } from "../deps.ts";
-import { dataManager } from "../singleton.ts";
-import { Config } from "../types/Config.ts";
+import UserModel, { DiscordUser, UserSchema } from "../../database/models/user.ts";
+import { Router } from "../../deps.ts";
+import { dataManager } from "../../singleton.ts";
+import { Config } from "../../types/Config.ts";
 
 const configToml = await dataManager.getConfigToml() as Config;
 

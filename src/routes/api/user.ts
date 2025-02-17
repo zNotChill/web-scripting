@@ -1,8 +1,8 @@
-import { Router } from "../deps.ts";
-import UserModel, { UserSchema } from "../database/models/user.ts";
-import { dataManager } from "../singleton.ts";
-import { getRandomCode } from "../utils/code.ts";
-import { sanitize } from "../utils/sanitize.ts";
+import { Router } from "../../deps.ts";
+import UserModel, { UserSchema } from "../../database/models/user.ts";
+import { dataManager } from "../../singleton.ts";
+import { getRandomCode } from "../../utils/code.ts";
+import { sanitize } from "../../utils/sanitize.ts";
 
 const router = new Router();
 

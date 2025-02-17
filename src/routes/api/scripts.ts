@@ -1,5 +1,5 @@
-import UserModel from "../database/models/user.ts";
-import { Router } from "../deps.ts";
+import UserModel from "../../database/models/user.ts";
+import { Router } from "../../deps.ts";
 
 const router = new Router();
 
