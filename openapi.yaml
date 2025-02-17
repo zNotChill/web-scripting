@@ -1,0 +1,124 @@
+openapi: 3.0.1
+info:
+  title: Plum
+  description: API endpoints for Plum
+  version: 1.0.0
+servers:
+  - url: http://localhost:23005
+    description: Local
+
+paths:
+  /api/auth/discord/login:
+    get:
+      summary: Discord Auth Redirect
+      description: This endpoint redirects users to the Discord OAuth2 authentication page.
+      tags:
+        - Auth
+      responses:
+        "302":
+          description: Redirects to Discord authentication
+  
+  /api/auth/discord/callback:
+    get:
+      summary: Discord Auth Callback
+      description: Exchanges the authorization code for an access token and retrieves user data.
+      tags:
+        - Auth
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: Authorization code received from Discord
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Authentication successful, redirects to homepage
+          headers:
+            Set-Cookie:
+              description: Sets an access_token cookie
+              schema:
+                type: string
+        "400":
+          description: Bad request, invalid or missing code
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /api/users/@me:
+    get:
+      summary: Get Authed User
+      description: Fetches user information based on the stored access token.
+      tags:
+        - Users
+      responses:
+        "200":
+          description: User information retrieved successfully
+        "400":
+          description: Invalid access token or user not found
+  
+  /api/users/@me/code:
+    get:
+      summary: New Verification Code
+      description: Returns a verification code for Minecraft authentication.
+      tags:
+        - Users
+      responses:
+        "200":
+          description: Code generated successfully
+        "400":
+          description: Invalid access token or user does not exist
+        "429":
+          description: Requesting codes too fast
+  
+  /api/users/findCode:
+    get:
+      summary: Get User by Code
+      description: Admin-only endpoint to find a user based on a verification code.
+      tags:
+        - Users
+      responses:
+        "200":
+          description: User found successfully
+        "400":
+          description: Invalid key or user not found
+  
+  /api/users/verify:
+    post:
+      summary: Verify User
+      description: Admin-only endpoint to verify a user's Minecraft account.
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                uuid:
+                  type: string
+                username:
+                  type: string
+      responses:
+        "200":
+          description: User verified successfully
+        "400":
+          description: Invalid request or user already verified
+        "500":
+          description: Failed to update verification status
