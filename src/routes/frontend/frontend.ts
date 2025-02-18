@@ -5,4 +5,4 @@ const router = new Router();
 
 router.use(editorRouter.routes());
 
-export const frontendRouter = router;
+export const frontendRoutes = router;

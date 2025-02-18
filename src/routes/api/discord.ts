@@ -71,7 +71,7 @@ router.get("/api/auth/discord/callback", async (context) => {
           code: 0,
           code_requested_at: 0
         },
-        max_scripts: dataManager.loadedConfigToml?.server.scripting.max_scripts || 10
+        max_scripts: dataManager.loadedConfigToml?.server.scripting.max_scripts_per_user || 10
       }
 
       await UserModel.createUser(userSchema);

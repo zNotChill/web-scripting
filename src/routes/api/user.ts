@@ -3,6 +3,7 @@ import UserModel, { UserSchema } from "../../database/models/user.ts";
 import { dataManager } from "../../singleton.ts";
 import { getRandomCode } from "../../utils/code.ts";
 import { sanitize } from "../../utils/sanitize.ts";
+import { getMyScripts } from "./scripts.ts";
 
 const router = new Router();
 
@@ -73,13 +74,13 @@ router.get("/api/users/@me/code", async (context) => {
     
     if (
       user.minecraft_user.code_requested_at + 
-      (dataManager.loadedConfigToml?.server.mc_verification.code_expire_time ?? 0)
+      (dataManager.loadedConfigToml?.server.mc_verification.code_expire_time_ms ?? 0)
       > Date.now()
     ) {
       const timeRemaining = 
         Math.ceil(
           (user.minecraft_user.code_requested_at + 
-          (dataManager.loadedConfigToml?.server.mc_verification.code_expire_time ?? 0) - 
+          (dataManager.loadedConfigToml?.server.mc_verification.code_expire_time_ms ?? 0) - 
           Date.now()) / 1000
         );
   
@@ -248,6 +249,10 @@ router.post("/api/users/verify", async (context) => {
       };
     }
   }
-})
+});
+
+// self script management
+
+router.get("/api/users/@me/scripts", getMyScripts);
 
 export const userRoutes = router;

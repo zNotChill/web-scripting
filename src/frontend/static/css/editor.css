@@ -1,3 +1,61 @@
-.editor {
-  background-color: #333;
+@import url(https://fonts.bunny.net/css?family=fira-mono:400,500,700);
+/*  */
+
+:root {
+  --background: #21252b;
+  --text: #FFFFFF;
+  --primary: #68a7d6;
+  --secondary: #1D1622;
+
+  --option: #282c34;
+  --option-selected: #343434;
+
+  --sidebar-width: 150px;
+
+  --font: "Fira Mono", monospace;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  background-color: var(--background);
+  color: var(--text);
+  width: 100vw;
+  height: 100vh;
+  font-family: var(--font);
+}
+
+#container {
+  position: absolute;
+  left: var(--sidebar-width);
+  top: 0;
+}
+
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  padding-top: 10px;
+}
+
+.sidebar-option {
+  background-color: var(--option);
+  height: 40px;
+  font-size: 1.25rem;
+  border-top-left-radius: 15px;
+  border-bottom-left-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.sidebar-option.selected {
+  color: var(--primary);
+  font-weight: 900;
+  margin-left: 10px;
+  padding-right: 10px;
 }

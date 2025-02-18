@@ -9,6 +9,10 @@ export const editorRouter = new Router()
       css: API.getPageDeps([
         join("css", "main.css"),
         join("css", "editor.css")
+      ]),
+      js: API.getPageDeps([
+        join("js", "api.js"),
+        join("js", "editor.js"),
       ])
     }
 
