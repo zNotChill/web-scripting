@@ -39,47 +39,9 @@ class ScriptModel {
       "extension": script.extension,
     });
 
-    let existingScriptSelection;
-    let scriptSelection;
-
     if (existingScript) {
-      delete existingScript['_id'];
-
-      existingScriptSelection = {
-        name: existingScript.name,
-        extension: existingScript.extension,
-        content: existingScript.content,
-        discord_id: existingScript.discord_id
-      }
-
-      scriptSelection = {
-        name: script.name,
-        extension: script.extension,
-        content: script.content,
-        discord_id: script.discord_id
-      }
-    }
-
-    // The script already exists or nothing changed
-    if (existingScript && existingScriptSelection === scriptSelection) {
       return {
-        error: true
-      }
-    }
-
-    if (existingScript && existingScriptSelection !== scriptSelection) {
-      await this.updateScript({
-        old_name: existingScript.name,
-        old_extension: existingScript.extension,
-        old_content: existingScript.content,
-        discord_id: existingScript.discord_id,
-        new_name: script.name,
-        new_extension: script.extension,
-        new_content: script.content
-      });
-      
-      return {
-        updated: true
+        error: "Already exists"
       }
     }
 
@@ -106,6 +68,10 @@ class ScriptModel {
       return script;
     });
   }
+  
+  static async deleteScript(script: ScriptSchema) {
+    await this.getCollection().deleteOne(script);
+  }
 
   static async updateScript(scriptQuery: UpdateScriptRequest) {
     const script = await this.getScript({
@@ -117,6 +83,34 @@ class ScriptModel {
     
     if (!script) {
       return { error: "Script not found" };
+    }
+
+    let existingScriptSelection;
+    let scriptSelection;
+
+    if (script) {
+      delete script['_id'];
+
+      existingScriptSelection = {
+        name: script.name,
+        extension: script.extension,
+        content: script.content,
+        discord_id: script.discord_id
+      }
+
+      scriptSelection = {
+        name: scriptQuery.new_name,
+        extension: scriptQuery.new_extension,
+        content: scriptQuery.new_content,
+        discord_id: scriptQuery.discord_id
+      }
+    }
+
+    // The script already exists or nothing changed
+    if (script && JSON.stringify(existingScriptSelection) === JSON.stringify(scriptSelection)) {
+      return {
+        error: "Nothing changed"
+      }
     }
 
     return await this.getCollection().updateOne(

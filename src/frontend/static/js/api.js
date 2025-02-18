@@ -27,6 +27,18 @@ class API {
 
     return json;
   }
+
+  async getLanguages() {
+    const res = await fetch("/api/scripts/languages", {
+      headers: {
+        "Cookie": `access_token=${this.access_token}`
+      }
+    })
+
+    const json = await res.json();
+
+    return json;
+  }
 }
 
 const api = new API();
