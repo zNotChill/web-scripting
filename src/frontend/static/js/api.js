@@ -39,6 +39,25 @@ class API {
 
     return json;
   }
+
+  async createScript(name, extension, content) {
+    const res = await fetch("/api/scripts", {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        extension,
+        content
+      }),
+      headers: {
+        "Cookie": `access_token=${this.access_token}`,
+        "Content-Type": "application/json"
+      }
+    })
+
+    const json = await res.json();
+
+    return json;
+  }
 }
 
 const api = new API();

@@ -1,14 +1,15 @@
 @import url(https://fonts.bunny.net/css?family=fira-mono:400,500,700);
-/*  */
 
 :root {
-  --background: #21252b;
+  --hue: 200;
+  --background: hsl(var(--hue), 89%, 4%);
+  --background-1: hsl(var(--hue), 89%, 12%);
+  --background-2: hsl(var(--hue), 89%, 20%);
   --text: #FFFFFF;
-  --primary: #68a7d6;
-  --secondary: #1D1622;
-
-  --option: #282c34;
-  --option-selected: #343434;
+  
+  --primary-light: hsl(var(--hue), 89%, 80%);
+  --primary: hsl(var(--hue), 89%, 74%);
+  --primary-dark: hsl(var(--hue), 89%, 60%);
 
   --sidebar-width: 150px;
 
@@ -33,29 +34,100 @@ html, body {
   position: absolute;
   left: var(--sidebar-width);
   top: 0;
+  padding-top: 15px;
+}
+#container .view-lines {
+  font-family: var(--font)!important;
 }
 
 .sidebar {
   width: var(--sidebar-width);
   height: 100vh;
   padding-top: 10px;
+  padding: 10px;
+  border-right: 1px solid var(--background-1);
+}
+
+.sidebar-splitter {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--background-2);
+}
+
+.sidebar .sidebar-top {
+  height: 50%;
 }
 
 .sidebar-option {
-  background-color: var(--option);
-  height: 40px;
-  font-size: 1.25rem;
-  border-top-left-radius: 15px;
-  border-bottom-left-radius: 15px;
+  background-color: var(--background-1);
+  height: 25px;
+  font-size: 0.875rem;
+  border-radius: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: 10px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--text);
+  transition: all 0.15s linear;
+}
+
+.sidebar-option .option-title {
+  display: flex;
+}
+
+.sidebar-option:hover:not(.selected) {
+  color: var(--primary-dark)!important;
+  background-color: var(--background-2);
 }
 
 .sidebar-option.selected {
-  color: var(--primary);
-  font-weight: 900;
-  margin-left: 10px;
-  padding-right: 10px;
+  color: var(--primary-light);
+  background-color: var(--background-2);
+}
+
+input {
+  outline: 0;
+  border: 1px solid var(--background-2);
+  width: 100%;
+  background-color: transparent;
+  height: 25px;
+  border-radius: 5px;
+  font-family: var(--font);
+  font-size: 0.875rem;
+  text-align: center;
+  color: var(--text);
+}
+
+.popups-container {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  gap: 20px;
+  bottom: 20px;
+  right: 20px;
+  position: fixed;
+}
+
+.popup {
+  background-color: var(--background-1);
+  border: 1px solid var(--background-2);
+  color: var(--text);
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: max-content;
+}
+
+.popup .popup-title {
+  padding: 10px;
+  font-size: 1.2rem;
+  border-bottom: 1px solid var(--background-2);
+}
+
+.popup .popup-content {
+  padding: 10px;
+  font-size: 1rem;
 }

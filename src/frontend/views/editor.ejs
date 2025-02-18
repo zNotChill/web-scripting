@@ -9,29 +9,39 @@
 <style>
 <%- css %>
 </style>
+<script>
+const currentUser = <%- JSON.stringify(user) %>
+</script>
 <body>
   <div class="sidebar">
     <div class="sidebar-top">
-      <div class="sidebar-option selected">
+      <div class="sidebar-option" data-tab="home" onclick="setTimeout(() => { toggleTab('home'); setEditorModel(getHomeContent(), 'lua'); }, 50)">
         <div class="option-title">
-          main.lua
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" width="14" height="14" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke="currentColor" style="--darkreader-inline-stroke: currentColor;" data-darkreader-inline-stroke="">
+            <path d="M5 12l-2 0l9 -9l9 9l-2 0"></path>
+            <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"></path>
+            <path d="M10 12h4v4h-4z"></path>
+          </svg>
         </div>
       </div>
-      <div class="sidebar-option">
+      <div class="sidebar-option" data-tab="new_file_sidebar_option" onclick="setTimeout(() => { newFileInput() }, 50)">
         <div class="option-title">
-          main.lua
+          +
         </div>
       </div>
+
+      <div class="sidebar-splitter"></div>
     </div>
     <div class="sidebar-bottom">
-
     </div>
   </div>
   <div id="container" style="width:100%; height:100vh;"></div>
 
-  <script>
-    <%- js %>
-  </script>
+  <div class="popups-container"></div>
+
+<script>
+<%- js %>
+</script>
 
 </body>
 </html>
