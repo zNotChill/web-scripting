@@ -14,6 +14,10 @@
   --error: hsl(0, 89%, 4%);
   --error-1: hsl(0, 89%, 12%);
   --error-2: hsl(0, 89%, 20%);
+  --error-3: hsl(0, 89%, 28%);
+  --error-4: hsl(0, 89%, 36%);
+  --error-5: hsl(0, 89%, 44%);
+  --error-6: hsl(0, 89%, 52%);
 
   --sidebar-width: 150px;
 
@@ -75,6 +79,19 @@ html, body {
   user-select: none;
   color: var(--text);
   transition: all 0.15s linear;
+}
+
+.sidebar-option .unsaved-edits {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.sidebar-option .unsaved-edits.visible {
+  opacity: 1;
 }
 
 .sidebar-option .option-title {
@@ -139,4 +156,64 @@ input {
 .popup .popup-content {
   padding: 10px;
   font-size: 1rem;
+}
+
+.context-menu {
+  position: fixed;
+  z-index: 123456789;
+  opacity: 1;
+  background-color: var(--background);
+  border: 1px solid var(--background-2);
+  border-radius: 5px;
+  width: 100px;
+}
+
+.context-menu .menu-option {
+  padding: 10px;
+  color: var(--text);
+  font-size: 0.875rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  gap: 5px;
+}
+
+.context-menu .menu-option.no-click {
+  cursor: default;
+}
+
+.context-menu .menu-option.no-center {
+  justify-content: left;
+}
+
+.context-menu .menu-option.error, .context-menu .menu-option.error svg {
+  color: var(--error-5);
+  fill: var(--error-5);
+}
+
+.context-menu .menu-option:hover {
+  background-color: var(--background-1);
+}
+
+.context-menu .menu-option .text {
+  height: 16px;
+}
+
+.context-menu .menu-splitter {
+  border-bottom: 1px solid var(--background-2);
+  height: 1px;
+}
+
+.no-flex {
+  display: block!important;
+}
+
+.text-wrap {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  padding: 5px;
 }

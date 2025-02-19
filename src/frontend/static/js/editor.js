@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   loadedScripts.forEach((script) => {
     newFile(script.name, script.extension);
-  })
+  });
 
   const container = document.querySelector("#container");
   container.style.width = "calc(100vw - var(--sidebar-width))";
@@ -107,10 +107,150 @@ document.addEventListener("DOMContentLoaded", async () => {
       editor.layout();
     });
   });
+
+  document.querySelector("#container").addEventListener("keypress", () => {
+    const parsedCurrentTab = {
+      name: "",
+      extension: ""
+    };
+
+    const splitTab = currentTab.split("-");
+    parsedCurrentTab.name = splitTab[1];
+    parsedCurrentTab.extension = splitTab[2];
+
+    const script = loadedScripts.find((script) => 
+      script.name === parsedCurrentTab.name && 
+      script.extension === parsedCurrentTab.extension)
+
+    if (!script) return;
+
+    script.content = editor.getValue();
+    console.log(script);
+  });
+
+  document.querySelector(".sidebar .sidebar-top").addEventListener("dblclick", (e) => {
+    if (!e.target.classList.contains("sidebar-top")) return;
+    
+    newFileInput();
+  });
+
+  document.querySelectorAll(".sidebar .sidebar-top .sidebar-option").forEach((el) => {
+    if (!el.hasAttribute("data-type")) return;
+
+    const type = el.attributes["data-type"].value;
+    const name = el.attributes["data-name"].value;
+    const extension = el.attributes["data-ext"].value;
+    
+    el.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+
+      if (type === "script") {
+        showContextMenu("script", {
+          name,
+          extension
+        }, el)
+      }
+    });
+  });
 });
 
+function showContextMenu(type, data, element) {
+  const offset = [
+    element.offsetTop,
+    element.offsetWidth
+  ]
+
+  let contextMenu = document.querySelector(".context-menu");
+
+  if (!contextMenu) {
+    const contextElement = document.createElement("div");
+    contextElement.classList.add("context-menu");
+    document.body.appendChild(contextElement);
+
+    contextMenu = document.querySelector(".context-menu");
+  }
+
+  contextMenu.style.opacity = 1;
+  contextMenu.innerHTML = "";
+
+  if (type === "script") {
+    contextMenu.style.top = `${offset[0]}px`; 
+    contextMenu.style.left = `${offset[1] + 20}px`;
+
+    const name = document.createElement("div");
+    name.classList.add("menu-option");
+    name.classList.add("no-click");
+    name.classList.add("no-flex");
+    name.classList.add("text-wrap");
+    name.innerText = `${data.name}.${data.extension}`;
+    contextMenu.appendChild(name);
+
+    const splitter = document.createElement("div");
+    splitter.classList.add("menu-splitter");
+    contextMenu.appendChild(splitter);
+    
+    const deleteOption = document.createElement("div");
+    deleteOption.classList.add("menu-option");
+    deleteOption.classList.add("error");
+    deleteOption.classList.add("no-center");
+    deleteOption.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="--darkreader-inline-fill: currentColor;" data-darkreader-inline-fill="">
+        <path d="M20 6a1 1 0 0 1 .117 1.993l-.117 .007h-.081l-.919 11a3 3 0 0 1 -2.824 2.995l-.176 .005h-8c-1.598 0 -2.904 -1.249 -2.992 -2.75l-.005 -.167l-.923 -11.083h-.08a1 1 0 0 1 -.117 -1.993l.117 -.007h16z"></path>
+        <path d="M14 2a2 2 0 0 1 2 2a1 1 0 0 1 -1.993 .117l-.007 -.117h-4l-.007 .117a1 1 0 0 1 -1.993 -.117a2 2 0 0 1 1.85 -1.995l.15 -.005h4z"></path>
+      </svg>
+      <div class="text">Delete</div>
+    `;
+
+    contextMenu.appendChild(deleteOption);
+
+    deleteOption.addEventListener("click", async () => {
+      const result = await attemptDeleteScript(data.name, data.extension);
+
+      if (result.error) return;
+
+      contextMenu.remove();
+      removeFile(data.name, data.extension);
+    })
+
+    const saveOption = document.createElement("div");
+    saveOption.classList.add("menu-option");
+    saveOption.classList.add("no-center");
+    saveOption.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" stroke-width="2" style="--darkreader-inline-stroke: currentColor;" data-darkreader-inline-stroke="">
+        <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"></path>
+        <path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
+        <path d="M14 4l0 4l-6 0l0 -4"></path>
+      </svg>
+      <div class="text">Save</div>
+    `;
+    contextMenu.appendChild(saveOption);
+  }
+  
+  function handleKeyPress(e) {
+    if (e.key === "Escape") {
+      contextMenu.remove();
+      cleanup();
+    }
+  }
+
+  function handleClickOutside(e) {
+    if (!contextMenu.contains(e.target)) {
+      contextMenu.remove();
+      cleanup();
+    }
+  }
+
+  function cleanup() {
+    document.removeEventListener("keydown", handleKeyPress);
+    document.removeEventListener("click", handleClickOutside);
+  }
+
+  document.addEventListener("keydown", handleKeyPress);
+  document.addEventListener("click", handleClickOutside);
+}
+
 function setEditorModel(content, language) {
-  editor.setModel(monaco.editor.createModel(content, language))
+  editor.setModel(monaco.editor.createModel(content, language));
 }
 
 function toggleTab(tab) {
@@ -122,24 +262,19 @@ function toggleTab(tab) {
   currentTab = tab;
 }
 
-document.querySelector("#container").addEventListener("keypress", () => {
-  loadedScripts[`${selectedTab.name}${selectedTab.extension}`].content = editor.getValue();
-})
-
-document.querySelector(".sidebar .sidebar-top").addEventListener("dblclick", (e) => {
-  if (!e.target.classList.contains("sidebar-top")) return;
-  
-  newFileInput();
-})
-
 function newFile(name, extension) {
   document.querySelector(".sidebar .sidebar-top").innerHTML += `
-    <div class="sidebar-option" data-tab="script-${name}-${extension}" data-name="${name}" data-ext="${extension}" onclick="setTimeout(() => { toggleTab('script-${name}-${extension}'); setEditorModel(getScript('${name}', '${extension}').content, '${extension}'); }, 50)">
-      <div class="option-title">
+    <div class="sidebar-option" data-type="script" data-tab="script-${name}-${extension}" data-name="${name}" data-ext="${extension}" onclick="setTimeout(() => { toggleTab('script-${name}-${extension}'); setEditorModel(getScript('${name}', '${extension}').content, '${extension}'); }, 50)">
+      <div class="option-title text-wrap no-flex">
         ${name}.${extension}
       </div>
     </div>
   `;
+}
+
+function removeFile(name, extension) {
+  const element = document.querySelector(`.sidebar .sidebar-top .sidebar-option[data-tab="script-${name}-${extension}"]`);
+  element.remove();
 }
 
 function newFileInput() {
@@ -199,6 +334,7 @@ function newFileInput() {
   document.addEventListener("click", handleClickOutside);
 }
 
+
 function newPopup(data) {
   const title = data.title;
   const content = data.content;
@@ -224,6 +360,7 @@ async function attemptCreateScript(name, extension, content) {
       title: result.error,
       type: "error"
     });
+    return;
   }
   
   loadedScripts.push({
@@ -231,5 +368,23 @@ async function attemptCreateScript(name, extension, content) {
     extension: extension,
     content: content
   })
+  return result;
+}
+
+async function attemptDeleteScript(name, extension) {
+  const result = await api.deleteScript(name, extension);
+
+  if (result.error) {
+    newPopup({
+      title: result.error,
+      type: "error"
+    });
+    return;
+  }
+  
+  loadedScripts = loadedScripts.filter(script => 
+    !(script.name === name && script.extension === extension)
+  );
+
   return result;
 }

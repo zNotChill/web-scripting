@@ -58,6 +58,24 @@ class API {
 
     return json;
   }
+
+  async deleteScript(name, extension) {
+    const res = await fetch("/api/scripts", {
+      method: "DELETE",
+      body: JSON.stringify({
+        name,
+        extension
+      }),
+      headers: {
+        "Cookie": `access_token=${this.access_token}`,
+        "Content-Type": "application/json"
+      }
+    })
+
+    const json = await res.json();
+
+    return json;
+  }
 }
 
 const api = new API();
