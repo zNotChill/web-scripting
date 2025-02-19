@@ -8,88 +8,14 @@ import { isScriptBodyValid } from "../../utils/validation.ts";
 
 const router = new Router();
 
-export async function getMyScripts(context: Context) {
+router.post("/api/admin/scripts", async (context) => {
   try {
-    const accessToken = await context.cookies.get("access_token");
-
-    if (!accessToken) {
-      context.response.status = 400;
-      context.response.body = {
-        error: "Invalid access token"
-      };
-      return;
-    }
-  
-    const user = await UserModel.getUser({
-      access_token: accessToken
-    }) as UserSchema;
-  
-    if (!user) {
-      context.response.status = 400;
-      context.response.body = {
-        error: "User does not exist"
-      };
-      return;
-    }
-
-    const scripts = await ScriptModel.getScriptsByUser(user.discord_user.id);
-
-    context.response.status = 200;
-    context.response.body = scripts;
-  } catch (error) {
-    context.response.status = 400;
-    if (error instanceof Error) {
-      context.response.body = {
-        error: `${error.message}`
-      }
-    } else {
-      context.response.status = 500;
-      context.response.body = {
-        error: "An unknown error occurred"
-      };
-    }
-  }
-}
-
-router.get("/api/scripts/languages", (context) => {
-  try {
-    context.response.status = 200;
-    context.response.body = dataManager.loadedConfigToml?.server.scripting.enabled_languages;
-  } catch (error) {
-    context.response.status = 400;
-    if (error instanceof Error) {
-      context.response.body = {
-        error: `${error.message}`
-      }
-    } else {
-      context.response.status = 500;
-      context.response.body = {
-        error: "An unknown error occurred"
-      };
-    }
-  }
-})
-
-router.post("/api/scripts", async (context) => {
-  try {
-    const accessToken = await context.cookies.get("access_token");
+    const adminKey = await context.cookies.get("admin_key");
     const body = await context.request.body.json();
     
     if (
       (!body) ||
-      (!body.name || !body.extension || !body.content)
-    ) {
-      context.response.status = 400;
-      context.response.body = {
-        error: "Invalid body"
-      };
-      return;
-    }
-    
-    if (
-      typeof body.name !== "string" ||
-      typeof body.extension !== "string" ||
-      typeof body.content !== "string"
+      (!body.name || !body.extension || !body.content || !body.discord_id)
     ) {
       context.response.status = 400;
       context.response.body = {
@@ -98,10 +24,23 @@ router.post("/api/scripts", async (context) => {
       return;
     }
 
-    if (!accessToken) {
+    if (
+      typeof body.name !== "string" ||
+      typeof body.extension !== "string" ||
+      typeof body.content !== "string" ||
+      typeof body.discord_id !== "string"
+    ) {
       context.response.status = 400;
       context.response.body = {
-        error: "Invalid access token"
+        error: "Invalid body"
+      };
+      return;
+    }
+    
+    if (!adminKey || adminKey !== dataManager.loadedConfigToml?.server.admin_key) {
+      context.response.status = 400;
+      context.response.body = {
+        error: "Invalid admin key"
       };
       return;
     }
@@ -113,10 +52,8 @@ router.post("/api/scripts", async (context) => {
       context.response.body = isBodyValid.body;
       return;
     }
-
-    const user = await UserModel.getUser({
-      access_token: accessToken
-    }) as UserSchema;
+    
+    const user = await UserModel.getUserByDiscordId(body.discord_id) as UserSchema;
     
     if (!user) {
       context.response.status = 400;
@@ -159,7 +96,7 @@ router.post("/api/scripts", async (context) => {
     if (userScripts.length >= dataManager.loadedConfigToml!.server.scripting.max_scripts_per_user) {
       context.response.status = 400;
       context.response.body = {
-        error: "You have reached the max scripts for your user.",
+        error: "This user has reached the maximum amount of scripts.",
       };
       return;
     }
@@ -199,16 +136,16 @@ router.post("/api/scripts", async (context) => {
   }
 });
 
-router.patch("/api/scripts", async (context) => {
+router.patch("/api/admin/scripts", async (context) => {
   try {
-    const accessToken = await context.cookies.get("access_token");
+    const adminKey = await context.cookies.get("admin_key");
     const body = await context.request.body.json();
     
     if (
       (!body) ||
       (
         !body.name || !body.extension || !body.content ||
-        !body.old_name || !body.old_extension
+        !body.old_name || !body.old_extension  || !body.discord_id
       )
     ) {
       context.response.status = 400;
@@ -223,7 +160,8 @@ router.patch("/api/scripts", async (context) => {
       typeof body.extension !== "string" ||
       typeof body.content !== "string" ||
       typeof body.old_name !== "string" ||
-      typeof body.old_extension !== "string"
+      typeof body.old_extension !== "string" ||
+      typeof body.discord_id !== "string"
     ) {
       context.response.status = 400;
       context.response.body = {
@@ -232,10 +170,10 @@ router.patch("/api/scripts", async (context) => {
       return;
     }
 
-    if (!accessToken) {
+    if (!adminKey || adminKey !== dataManager.loadedConfigToml?.server.admin_key) {
       context.response.status = 400;
       context.response.body = {
-        error: "Invalid access token"
+        error: "Invalid admin key"
       };
       return;
     }
@@ -248,9 +186,7 @@ router.patch("/api/scripts", async (context) => {
       return;
     }
 
-    const user = await UserModel.getUser({
-      access_token: accessToken
-    }) as UserSchema;
+    const user = await UserModel.getUserByDiscordId(body.discord_id) as UserSchema;
     
     if (!user) {
       context.response.status = 400;
@@ -338,15 +274,15 @@ router.patch("/api/scripts", async (context) => {
   }
 });
 
-router.delete("/api/scripts", async (context) => {
+router.delete("/api/admin/scripts", async (context) => {
   try {
-    const accessToken = await context.cookies.get("access_token");
+    const adminKey = await context.cookies.get("admin_key");
     const body = await context.request.body.json();
     
     if (
       (!body) ||
       (
-        !body.name || !body.extension
+        !body.name || !body.extension || !body.discord_id
       )
     ) {
       context.response.status = 400;
@@ -355,10 +291,11 @@ router.delete("/api/scripts", async (context) => {
       };
       return;
     }
-    
+
     if (
       typeof body.name !== "string" ||
-      typeof body.extension !== "string"
+      typeof body.extension !== "string" ||
+      typeof body.discord_id !== "string"
     ) {
       context.response.status = 400;
       context.response.body = {
@@ -367,10 +304,10 @@ router.delete("/api/scripts", async (context) => {
       return;
     }
 
-    if (!accessToken) {
+    if (!adminKey || adminKey !== dataManager.loadedConfigToml?.server.admin_key) {
       context.response.status = 400;
       context.response.body = {
-        error: "Invalid access token"
+        error: "Invalid admin key"
       };
       return;
     }
@@ -383,9 +320,7 @@ router.delete("/api/scripts", async (context) => {
       return;
     }
 
-    const user = await UserModel.getUser({
-      access_token: accessToken
-    }) as UserSchema;
+    const user = await UserModel.getUserByDiscordId(body.discord_id) as UserSchema;
     
     if (!user) {
       context.response.status = 400;
@@ -433,4 +368,4 @@ router.delete("/api/scripts", async (context) => {
   }
 })
 
-export const scriptRoutes = router;
+export const scriptAdminRoutes = router;

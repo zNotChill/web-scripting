@@ -84,6 +84,15 @@ class UserModel {
     return userData;
   }
 
+  static async getUserByDiscordId(id: string) {
+    const userData = await this.getCollection().findOne({
+      "discord_user.id": id
+    });
+
+    if (!userData) return null;
+    return userData;
+  }
+
   static async updateVerification(user: Partial<UserSchema>, username: string, uuid: string, verifiedAt: number, verified: boolean) {
     return await this.getCollection().updateOne(
       user,

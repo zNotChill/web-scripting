@@ -4,6 +4,7 @@ import { dataManager } from "../../singleton.ts";
 import { getRandomCode } from "../../utils/code.ts";
 import { sanitize } from "../../utils/sanitize.ts";
 import { getMyScripts } from "./scripts.ts";
+import ScriptModel from "../../database/models/script.ts";
 
 const router = new Router();
 
@@ -196,6 +197,18 @@ router.post("/api/users/verify", async (context) => {
       };
       return;
     }
+
+    if (
+      typeof body.code !== "number" ||
+      typeof body.uuid !== "string" ||
+      typeof body.username !== "string"
+    ) {
+      context.response.status = 400;
+      context.response.body = {
+        error: "Invalid body"
+      };
+      return;
+    }
     
     const user = await UserModel.getUserByCode(parseFloat(body.code)) as UserSchema;
 
@@ -251,8 +264,56 @@ router.post("/api/users/verify", async (context) => {
   }
 });
 
-// self script management
-
 router.get("/api/users/@me/scripts", getMyScripts);
+
+router.get("/api/users/:id/scripts", async (context) => {
+  try {
+    const adminKey = await context.cookies.get("admin_key");
+    const discordId = context.params.id;
+
+    if (!discordId) {
+      context.response.status = 400;
+      context.response.body = {
+        error: "Invalid body"
+      };
+      return;
+    }
+    
+    if (!adminKey || adminKey !== dataManager.loadedConfigToml?.server.admin_key) {
+      context.response.status = 400;
+      context.response.body = {
+        error: "Invalid admin key"
+      };
+      return;
+    }
+
+    const user = await UserModel.getUserByDiscordId(discordId) as UserSchema;
+    
+    if (!user) {
+      context.response.status = 400;
+      context.response.body = {
+        error: "User does not exist"
+      };
+      return;
+    }
+
+    const userScripts = await ScriptModel.getScriptsByUser(discordId);
+    
+    context.response.status = 200;
+    context.response.body = userScripts;
+  } catch (error) {
+    context.response.status = 400;
+    if (error instanceof Error) {
+      context.response.body = {
+        error: `${error.message}`
+      }
+    } else {
+      context.response.status = 500;
+      context.response.body = {
+        error: "An unknown error occurred"
+      };
+    }
+  }
+});
 
 export const userRoutes = router;

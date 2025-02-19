@@ -8,6 +8,7 @@ import { userRoutes } from "./routes/api/user.ts";
 import { join } from "node:path";
 import { frontendRoutes } from "./routes/frontend/frontend.ts";
 import { scriptRoutes } from "./routes/api/scripts.ts";
+import { scriptAdminRoutes } from "./routes/api/scriptsAdmin.ts";
 
 export class API {
   private app: Application;
@@ -55,6 +56,7 @@ export class API {
     this.app.use(discordRoutes.routes());
     this.app.use(userRoutes.routes());
     this.app.use(scriptRoutes.routes());
+    this.app.use(scriptAdminRoutes.routes());
     this.app.use(frontendRoutes.routes());
 
     this.app.listen({ port: this.port });
