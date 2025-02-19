@@ -334,8 +334,11 @@ function newFileInput() {
       element.remove();
       cleanup();
       newFile(filename, extension);
-      toggleTab(`script-${name}-${extension}`);
-      setEditorModel("", extension);
+
+      setTimeout(() => {
+        toggleTab(`script-${filename}-${extension}`);
+        setEditorModel(getScript(filename, extension).content, extension);
+      }, 20);
     }
   }
 

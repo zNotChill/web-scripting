@@ -118,6 +118,14 @@ router.post("/api/scripts", async (context) => {
     const extension = body.extension;
     const content = body.content;
 
+    if (!dataManager.loadedConfigToml?.server.scripting.enabled_languages.includes(extension)) {
+      context.response.status = 400;
+      context.response.body = {
+        error: "This language is not enabled on this server"
+      };
+      return;
+    }
+
     const query: ScriptSchema = {
       name: name,
       extension: extension,
@@ -231,6 +239,14 @@ router.patch("/api/scripts", async (context) => {
     const name = body.name;
     const extension = body.extension;
     const content = body.content;
+
+    if (!dataManager.loadedConfigToml?.server.scripting.enabled_languages.includes(extension)) {
+      context.response.status = 400;
+      context.response.body = {
+        error: "This language is not enabled on this server"
+      };
+      return;
+    }
 
     const query: ScriptSchema = {
       name: name,
