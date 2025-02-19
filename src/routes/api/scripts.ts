@@ -137,7 +137,7 @@ router.post("/api/scripts", async (context) => {
 
     const userScripts = await ScriptModel.getScriptsByUser(query.discord_id);
 
-    if (userScripts.length > dataManager.loadedConfigToml!.server.scripting.max_scripts_per_user) {
+    if (userScripts.length >= dataManager.loadedConfigToml!.server.scripting.max_scripts_per_user) {
       context.response.status = 400;
       context.response.body = {
         error: "You have reached the max scripts for your user.",
@@ -151,18 +151,6 @@ router.post("/api/scripts", async (context) => {
         error: "An identical script already exists.",
       };
       return;
-      // const last_edit = existingScript.last_edit / 1000;
-      // const now = Date.now() / 1000;
-      // const edit_cooldown = dataManager.loadedConfigToml!.server.scripting.individual_edit_cooldown_sec;
-
-      // if (now - last_edit < edit_cooldown) {
-      //   context.response.status = 429;
-      //   context.response.body = {
-      //     error: "You are being rate limited.",
-      //     tip: `wait ${((last_edit + edit_cooldown) - now).toFixed(2)} seconds to edit again`
-      //   };
-      //   return;
-      // }
     }
 
     const insertResult = await ScriptModel.createScript(query);
