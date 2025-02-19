@@ -11,6 +11,10 @@
   --primary: hsl(var(--hue), 89%, 74%);
   --primary-dark: hsl(var(--hue), 89%, 60%);
 
+  --error: hsl(0, 89%, 4%);
+  --error-1: hsl(0, 89%, 12%);
+  --error-2: hsl(0, 89%, 20%);
+
   --sidebar-width: 150px;
 
   --font: "Fira Mono", monospace;
@@ -119,6 +123,11 @@ input {
   justify-content: center;
   align-items: center;
   width: max-content;
+}
+
+.popup.error {
+  background-color: var(--error-1);
+  border-color: var(--error-2);
 }
 
 .popup .popup-title {

@@ -10,6 +10,10 @@ let currentTab = "";
 let loadedScripts = [];
 let enabledLanguages = [];
 
+function getScript(name, extension) {
+  return loadedScripts.find((script) => script.name === name && script.extension === extension);
+} 
+
 function getHomeContent() {
   const notLoggedInLines = [
     `-- This means you will have limited access to the webeditor.`,
@@ -56,12 +60,16 @@ function getHomeContent() {
   ].join("\n");
 }
 
-window.onload = async () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const scripts = await api.getMyScripts();
   const languages = await api.getLanguages();
 
   enabledLanguages = languages;
   loadedScripts = scripts;
+
+  loadedScripts.forEach((script) => {
+    newFile(script.name, script.extension);
+  })
 
   const container = document.querySelector("#container");
   container.style.width = "calc(100vw - var(--sidebar-width))";
@@ -99,7 +107,7 @@ window.onload = async () => {
       editor.layout();
     });
   });
-}
+});
 
 function setEditorModel(content, language) {
   editor.setModel(monaco.editor.createModel(content, language))
@@ -126,15 +134,12 @@ document.querySelector(".sidebar .sidebar-top").addEventListener("dblclick", (e)
 
 function newFile(name, extension) {
   document.querySelector(".sidebar .sidebar-top").innerHTML += `
-    <div class="sidebar-option" data-tab="script-${name}-${extension}" data-name="${name}" data-ext="${extension}" onclick="setTimeout(() => { toggleTab('script-${name}-${extension}'); setEditorModel('', '${extension}'); }, 50)">
+    <div class="sidebar-option" data-tab="script-${name}-${extension}" data-name="${name}" data-ext="${extension}" onclick="setTimeout(() => { toggleTab('script-${name}-${extension}'); setEditorModel(getScript('${name}', '${extension}').content, '${extension}'); }, 50)">
       <div class="option-title">
         ${name}.${extension}
       </div>
     </div>
   `;
-  
-  toggleTab(`script-${name}-${extension}`);
-  setEditorModel("", extension);
 }
 
 function newFileInput() {
@@ -151,7 +156,7 @@ function newFileInput() {
 
   input.focus();
 
-  function handleKeyPress(e) {
+  async function handleKeyPress(e) {
     if (e.key === "Escape") {
       element.remove();
       cleanup();
@@ -163,10 +168,18 @@ function newFileInput() {
     
       const filename = fileName.substring(0, lastDotIndex);
       const extension = fileName.substring(lastDotIndex + 1);
-    
+      
+      const result = await attemptCreateScript(filename, extension, "Begin editing...");
+      
+      if (result.error) {
+        return;
+      }
+      
       element.remove();
       cleanup();
       newFile(filename, extension);
+      toggleTab(`script-${name}-${extension}`);
+      setEditorModel("", extension);
     }
   }
 
@@ -186,10 +199,14 @@ function newFileInput() {
   document.addEventListener("click", handleClickOutside);
 }
 
-function newPopup(title, content) {
+function newPopup(data) {
+  const title = data.title;
+  const content = data.content;
+  const type = data.type;
+
   const time = Date.now()
   document.querySelector(".popups-container").innerHTML += `
-    <div class="popup" data-id="${time}">
+    <div class="popup ${type}" data-id="${time}">
       ${title && !content ? `
         <div class="popup-content">
           ${title}
@@ -197,4 +214,22 @@ function newPopup(title, content) {
       ` : ""}
     </div>
   `;
+}
+
+async function attemptCreateScript(name, extension, content) {
+  const result = await api.createScript(name, extension, content);
+
+  if (result.error) {
+    newPopup({
+      title: result.error,
+      type: "error"
+    });
+  }
+  
+  loadedScripts.push({
+    name: name,
+    extension: extension,
+    content: content
+  })
+  return result;
 }
