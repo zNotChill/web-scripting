@@ -140,11 +140,16 @@ input {
   justify-content: center;
   align-items: center;
   width: max-content;
+  flex-direction: column;
 }
 
 .popup.error {
   background-color: var(--error-1);
   border-color: var(--error-2);
+}
+
+.popup.error .popup-title {
+  border-bottom: 1px solid var(--error-2);
 }
 
 .popup .popup-title {

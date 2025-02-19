@@ -22,3 +22,7 @@ function parseHsl(hsl) {
     return [hue, saturation, lightness]
   }
 }
+
+function fixHTML(text) {
+  return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}

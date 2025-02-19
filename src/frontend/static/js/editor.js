@@ -71,6 +71,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     newFile(script.name, script.extension);
   });
 
+  loadData();
+
   const container = document.querySelector("#container");
   container.style.width = "calc(100vw - var(--sidebar-width))";
   container.style.height = "100vh";
@@ -108,7 +110,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  document.querySelector("#container").addEventListener("keypress", () => {
+  document.querySelector("#container").addEventListener("keydown", async (e) => {
     const parsedCurrentTab = {
       name: "",
       extension: ""
@@ -124,8 +126,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!script) return;
 
+    if (e.ctrlKey && e.key === "s") {
+      e.preventDefault();
+      await attemptUpdateScript(
+        parsedCurrentTab.name, parsedCurrentTab.extension,
+        parsedCurrentTab.name, parsedCurrentTab.extension, script.content
+      );
+      return;
+    }
+
     script.content = editor.getValue();
-    console.log(script);
+    script.last_edit = Date.now();
+    script.unsaved = true;
   });
 
   document.querySelector(".sidebar .sidebar-top").addEventListener("dblclick", (e) => {
@@ -224,6 +236,15 @@ function showContextMenu(type, data, element) {
       <div class="text">Save</div>
     `;
     contextMenu.appendChild(saveOption);
+
+    saveOption.addEventListener("click", async () => {
+      const script = getScript(data.name, data.extension);
+      await attemptUpdateScript(
+        data.name, data.extension,
+        data.name, data.extension, script.content
+      );
+      contextMenu.remove();
+    });
   }
   
   function handleKeyPress(e) {
@@ -264,7 +285,7 @@ function toggleTab(tab) {
 
 function newFile(name, extension) {
   document.querySelector(".sidebar .sidebar-top").innerHTML += `
-    <div class="sidebar-option" data-type="script" data-tab="script-${name}-${extension}" data-name="${name}" data-ext="${extension}" onclick="setTimeout(() => { toggleTab('script-${name}-${extension}'); setEditorModel(getScript('${name}', '${extension}').content, '${extension}'); }, 50)">
+    <div class="sidebar-option" data-type="script" data-tab="script-${fixHTML(name)}-${fixHTML(extension)}" data-name="${fixHTML(name)}" data-ext="${fixHTML(extension)}" onclick="setTimeout(() => { toggleTab('script-${fixHTML(name)}-${fixHTML(extension)}'); setEditorModel(getScript('${fixHTML(name)}', '${fixHTML(extension)}').content, '${fixHTML(extension)}'); }, 50)">
       <div class="option-title text-wrap no-flex">
         ${name}.${extension}
       </div>
@@ -334,7 +355,6 @@ function newFileInput() {
   document.addEventListener("click", handleClickOutside);
 }
 
-
 function newPopup(data) {
   const title = data.title;
   const content = data.content;
@@ -342,14 +362,29 @@ function newPopup(data) {
 
   const time = Date.now()
   document.querySelector(".popups-container").innerHTML += `
-    <div class="popup ${type}" data-id="${time}">
+    <div class="popup ${fixHTML(type || "")}" data-id="${time}">
       ${title && !content ? `
         <div class="popup-content">
-          ${title}
+          ${fixHTML(title)}
+        </div>
+      ` : ""}
+
+      ${title && content ? `
+        <div class="popup-title">
+          ${fixHTML(title)}
+        </div>
+        <div class="popup-content">
+          ${fixHTML(content)}
         </div>
       ` : ""}
     </div>
   `;
+
+  setTimeout(() => {
+    const element = document.querySelector(`.popups-container .popup[data-id="${time}"]`);
+
+    element.remove();
+  }, 7500);
 }
 
 async function attemptCreateScript(name, extension, content) {
@@ -363,6 +398,30 @@ async function attemptCreateScript(name, extension, content) {
     return;
   }
   
+  loadedScripts.push({
+    name: name,
+    extension: extension,
+    content: content
+  })
+  return result;
+}
+
+async function attemptUpdateScript(old_name, old_extension, name, extension, content) {
+  const result = await api.updateScript(old_name, old_extension, name, extension, content);
+
+  if (result.error) {
+    newPopup({
+      title: result.error,
+      content: result.tip,
+      type: "error"
+    });
+    return;
+  }
+  
+  newPopup({
+    title: "Saved script.",
+  });
+
   loadedScripts.push({
     name: name,
     extension: extension,
@@ -388,3 +447,34 @@ async function attemptDeleteScript(name, extension) {
 
   return result;
 }
+
+function loadData() {
+  const localScripts = JSON.parse(localStorage.getItem("local_scripts"));
+
+  loadedScripts.forEach((script) => {
+    const localScript = localScripts.find((ls) => 
+      ls.name === script.name &&
+      ls.extension === script.extension
+    );
+    const loadedScript = loadedScripts.find((ls) => 
+      ls.name === script.name &&
+      ls.extension === script.extension
+    );
+
+    // We should load the user's local version of the script
+    // since it is newer than the old script
+    if (localScript.last_edit > script.last_edit) {
+      loadedScript.content = localScript.content;
+      loadedScript.last_edit = localScript.last_edit;
+      loadedScript.unsaved = localScript.unsaved;
+    }
+  })
+}
+
+function saveData() {
+  localStorage.setItem("local_scripts", JSON.stringify(loadedScripts));
+}
+
+setInterval(() => {
+  saveData();
+}, 2000);

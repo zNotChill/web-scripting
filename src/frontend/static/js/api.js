@@ -59,6 +59,27 @@ class API {
     return json;
   }
 
+  async updateScript(old_name, old_extension, name, extension, content) {
+    const res = await fetch("/api/scripts", {
+      method: "PATCH",
+      body: JSON.stringify({
+        old_name,
+        old_extension,
+        name,
+        extension,
+        content
+      }),
+      headers: {
+        "Cookie": `access_token=${this.access_token}`,
+        "Content-Type": "application/json"
+      }
+    })
+
+    const json = await res.json();
+
+    return json;
+  }
+
   async deleteScript(name, extension) {
     const res = await fetch("/api/scripts", {
       method: "DELETE",

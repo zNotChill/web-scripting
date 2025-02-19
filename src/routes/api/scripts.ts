@@ -4,8 +4,7 @@ import UserModel from "../../database/models/user.ts";
 import { UserSchema } from "../../database/models/user.ts";
 import { Router } from "../../deps.ts";
 import { dataManager } from "../../singleton.ts";
-import { isScriptBodyValid, isValid, isValidExtension, isWithinSizeLimit } from "../../utils/validation.ts";
-import { Script } from "node:vm";
+import { isScriptBodyValid } from "../../utils/validation.ts";
 
 const router = new Router();
 
