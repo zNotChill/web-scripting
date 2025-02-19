@@ -145,25 +145,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     newFileInput();
   });
-
-  document.querySelectorAll(".sidebar .sidebar-top .sidebar-option").forEach((el) => {
-    if (!el.hasAttribute("data-type")) return;
-
-    const type = el.attributes["data-type"].value;
-    const name = el.attributes["data-name"].value;
-    const extension = el.attributes["data-ext"].value;
-    
-    el.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-
-      if (type === "script") {
-        showContextMenu("script", {
-          name,
-          extension
-        }, el)
-      }
-    });
-  });
 });
 
 function showContextMenu(type, data, element) {
@@ -480,4 +461,23 @@ function saveData() {
 
 setInterval(() => {
   saveData();
-}, 2000);
+
+  document.querySelectorAll(".sidebar .sidebar-top .sidebar-option").forEach((el) => {
+    if (!el.hasAttribute("data-type")) return;
+
+    const type = el.attributes["data-type"].value;
+    const name = el.attributes["data-name"].value;
+    const extension = el.attributes["data-ext"].value;
+    
+    el.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+
+      if (type === "script") {
+        showContextMenu("script", {
+          name,
+          extension
+        }, el)
+      }
+    });
+  });
+}, 500);
