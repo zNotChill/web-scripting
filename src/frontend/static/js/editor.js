@@ -24,8 +24,8 @@ function getHomeContent() {
   const loggedInLines = [
     `-- This means you will have unrestricted access to the webeditor.`,
     `local permissions = {`,
-    `  "create_scripts"`,
-    `  "edit_scripts"`,
+    `  "create_scripts",`,
+    `  "edit_scripts",`,
     `  "delete_scripts"`,
     `}`
   ].join("\n");
