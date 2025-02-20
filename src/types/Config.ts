@@ -8,6 +8,7 @@ export type Config = {
   server: {
     port: number,
     admin_key: string,
+    preferred_url: string,
     mc_verification: {
       code_expire_time_ms: number
     },

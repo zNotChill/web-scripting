@@ -5,7 +5,7 @@ class API {
   }
 
   async getMe() {
-    const res = await fetch("/api/users/@me", {
+    const res = await fetch(preferredURL + "/api/users/@me", {
       headers: {
         "Cookie": `access_token=${this.access_token}`
       }
@@ -17,7 +17,7 @@ class API {
   }
 
   async getMyScripts() {
-    const res = await fetch("/api/users/@me/scripts", {
+    const res = await fetch(preferredURL + "/api/users/@me/scripts", {
       headers: {
         "Cookie": `access_token=${this.access_token}`
       }
@@ -29,7 +29,7 @@ class API {
   }
 
   async getLanguages() {
-    const res = await fetch("/api/scripts/languages", {
+    const res = await fetch(preferredURL + "/api/scripts/languages", {
       headers: {
         "Cookie": `access_token=${this.access_token}`
       }
@@ -41,7 +41,7 @@ class API {
   }
 
   async createScript(name, extension, content) {
-    const res = await fetch("/api/scripts", {
+    const res = await fetch(preferredURL + "/api/scripts", {
       method: "POST",
       body: JSON.stringify({
         name,
@@ -60,7 +60,7 @@ class API {
   }
 
   async updateScript(old_name, old_extension, name, extension, content) {
-    const res = await fetch("/api/scripts", {
+    const res = await fetch(preferredURL + "/api/scripts", {
       method: "PATCH",
       body: JSON.stringify({
         old_name,
@@ -81,7 +81,7 @@ class API {
   }
 
   async deleteScript(name, extension) {
-    const res = await fetch("/api/scripts", {
+    const res = await fetch(preferredURL + "/api/scripts", {
       method: "DELETE",
       body: JSON.stringify({
         name,

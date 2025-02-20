@@ -4,10 +4,12 @@ import { Router } from "../../deps.ts";
 import ejs from "npm:ejs";
 import UserModel from "../../database/models/user.ts";
 import { sanitize } from "../../utils/sanitize.ts";
+import { dataManager } from "../../singleton.ts";
 
 export const editorRouter = new Router()
   .get("/editor", async (context) => {
     const data = {
+      preferred_url: dataManager.loadedConfigToml?.server.preferred_url,
       css: API.getPageDeps([
         join("css", "main.css"),
         join("css", "editor.css")
