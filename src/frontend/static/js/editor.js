@@ -17,7 +17,7 @@ function getScript(name, extension) {
 function getHomeContent() {
   const notLoggedInLines = [
     `-- This means you will have limited access to the webeditor.`,
-    `-- You can login in at ${window.location.origin}/api/auth/discord/login.`,
+    `-- You can login in at ${preferredURL}/api/auth/discord/login.`,
     `local permissions = {}`,
   ].join("\n");
 
@@ -67,9 +67,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   enabledLanguages = languages;
   loadedScripts = scripts;
 
-  loadedScripts.forEach((script) => {
-    newFile(script.name, script.extension);
-  });
+  if (!loadedScripts.error) {
+    loadedScripts.forEach((script) => {
+      newFile(script.name, script.extension);
+    });
+  }
 
   loadData();
 
@@ -435,8 +437,8 @@ async function attemptDeleteScript(name, extension) {
 function loadData() {
   const localScripts = JSON.parse(localStorage.getItem("local_scripts"));
 
-  console.log(localScripts);
-  
+  if (localScripts.error) return;
+
   loadedScripts.forEach((script) => {
     const localScript = localScripts.find((ls) => 
       ls.name === script.name &&
