@@ -89,6 +89,16 @@ class UserModel {
       "discord_user.id": id
     });
 
+    
+    if (!userData) return null;
+    return userData;
+  }
+  
+  static async getUserByUUID(id: string) {
+    const userData = await this.getCollection().findOne({
+      "minecraft_user.uuid": id
+    });
+    
     if (!userData) return null;
     return userData;
   }

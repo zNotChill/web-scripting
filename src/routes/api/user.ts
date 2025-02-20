@@ -269,6 +269,8 @@ router.get("/api/users/@me/scripts", getMyScripts);
 router.get("/api/users/:id/scripts", async (context) => {
   try {
     const adminKey = await context.cookies.get("admin_key");
+    const urlParams = new URLSearchParams(context.request.url.search);
+    const useUUID = urlParams.get("useUUID");
     const discordId = context.params.id;
 
     if (!discordId) {
@@ -287,7 +289,13 @@ router.get("/api/users/:id/scripts", async (context) => {
       return;
     }
 
-    const user = await UserModel.getUserByDiscordId(discordId) as UserSchema;
+    let user;
+
+    if (useUUID === "true") {
+      user = await UserModel.getUserByUUID(discordId) as UserSchema;
+    } else {
+      user = await UserModel.getUserByDiscordId(discordId) as UserSchema;
+    }
     
     if (!user) {
       context.response.status = 400;
@@ -297,7 +305,7 @@ router.get("/api/users/:id/scripts", async (context) => {
       return;
     }
 
-    const userScripts = await ScriptModel.getScriptsByUser(discordId);
+    const userScripts = await ScriptModel.getScriptsByUser(user.discord_user.id);
     
     context.response.status = 200;
     context.response.body = userScripts;
