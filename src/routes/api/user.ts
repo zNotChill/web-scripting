@@ -266,6 +266,62 @@ router.post("/api/users/verify", async (context) => {
 
 router.get("/api/users/@me/scripts", getMyScripts);
 
+router.get("/api/users/:id", async (context) => {
+  try {
+    const adminKey = await context.cookies.get("admin_key");
+    const urlParams = new URLSearchParams(context.request.url.search);
+    const useUUID = urlParams.get("useUUID");
+    const discordId = context.params.id;
+
+    if (!discordId) {
+      context.response.status = 400;
+      context.response.body = {
+        error: "Invalid body"
+      };
+      return;
+    }
+    
+    if (!adminKey || adminKey !== dataManager.loadedConfigToml?.server.admin_key) {
+      context.response.status = 400;
+      context.response.body = {
+        error: "Invalid admin key"
+      };
+      return;
+    }
+
+    let user;
+
+    if (useUUID === "true") {
+      user = await UserModel.getUserByUUID(discordId) as UserSchema;
+    } else {
+      user = await UserModel.getUserByDiscordId(discordId) as UserSchema;
+    }
+    
+    if (!user) {
+      context.response.status = 400;
+      context.response.body = {
+        error: "User does not exist"
+      };
+      return;
+    }
+    
+    context.response.status = 200;
+    context.response.body = sanitize(user);
+  } catch (error) {
+    context.response.status = 400;
+    if (error instanceof Error) {
+      context.response.body = {
+        error: `${error.message}`
+      }
+    } else {
+      context.response.status = 500;
+      context.response.body = {
+        error: "An unknown error occurred"
+      };
+    }
+  }
+});
+
 router.get("/api/users/:id/scripts", async (context) => {
   try {
     const adminKey = await context.cookies.get("admin_key");
