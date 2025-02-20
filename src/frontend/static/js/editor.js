@@ -438,6 +438,7 @@ function loadData() {
   const localScripts = JSON.parse(localStorage.getItem("local_scripts"));
 
   if (localScripts.error) return;
+  if (loadedScripts.error) return;
 
   loadedScripts.forEach((script) => {
     const localScript = localScripts.find((ls) => 
