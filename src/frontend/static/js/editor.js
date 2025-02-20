@@ -435,6 +435,8 @@ async function attemptDeleteScript(name, extension) {
 function loadData() {
   const localScripts = JSON.parse(localStorage.getItem("local_scripts"));
 
+  console.log(localScripts);
+  
   loadedScripts.forEach((script) => {
     const localScript = localScripts.find((ls) => 
       ls.name === script.name &&
@@ -444,6 +446,10 @@ function loadData() {
       ls.name === script.name &&
       ls.extension === script.extension
     );
+
+    if (!localScript) {
+      return;
+    }
 
     // We should load the user's local version of the script
     // since it is newer than the old script

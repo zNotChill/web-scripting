@@ -38,6 +38,20 @@ export class API {
       const ms = Date.now() - start;
       ctx.response.headers.set("X-Response-Time", `${ms}ms`);
     });
+
+    
+    this.app.use(async (ctx, next) => {
+      ctx.response.headers.set("Access-Control-Allow-Origin", "*");
+      ctx.response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+      ctx.response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  
+      if (ctx.request.method === "OPTIONS") {
+        ctx.response.status = 204;
+        return;
+      }
+    
+      await next();
+    });
   }
 
   static getPageDeps(files: string[]) {
