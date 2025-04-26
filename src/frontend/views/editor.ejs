@@ -14,6 +14,7 @@ const currentUser = <%- JSON.stringify(user) %>
 const preferredURL = "<%- preferred_url %>"
 </script>
 <body>
+  <div class="loading-menu"></div>
   <div class="sidebar">
     <div class="sidebar-top">
       <div class="sidebar-option" data-tab="home" onclick="setTimeout(() => { toggleTab('home'); setEditorModel(getHomeContent(), 'lua'); }, 50)">

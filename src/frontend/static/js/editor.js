@@ -61,6 +61,11 @@ function getHomeContent() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const sidebarWidth = localStorage.getItem("sidebar-width");
+  if (parseInt(sidebarWidth)) {
+    document.documentElement.style.setProperty("--sidebar-width", sidebarWidth + "px");
+  }
+
   const scripts = await api.getMyScripts();
   const languages = await api.getLanguages();
 
@@ -110,8 +115,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.addEventListener("resize", function() {
       editor.layout();
     });
+    hideLoadingMenu();
   });
-
+  
   document.querySelector("#container").addEventListener("keydown", async (e) => {
     const parsedCurrentTab = {
       name: "",
@@ -490,3 +496,37 @@ setInterval(() => {
     });
   });
 }, 500);
+
+function hideLoadingMenu() {
+  const menu = document.querySelector(".loading-menu");
+
+  menu.classList.add("exiting")
+}
+
+// Resizable sidebar
+
+const sidebar = document.querySelector(".sidebar");
+let isResizingSidebar = false;
+
+sidebar.addEventListener("mousedown", (e) => {
+  if (e.offsetX > sidebar.clientWidth - 10) {
+    isResizingSidebar = true;
+    document.body.style.cursor = "ew-resize";
+  }
+})
+
+document.addEventListener("mousemove", (e) => {
+  if (!isResizingSidebar) return;
+  const newWidth = e.clientX - sidebar.getBoundingClientRect().left;
+  const min = 150;
+  const max = 250;
+  const value = Math.min(Math.max(newWidth, min), max)
+  document.documentElement.style.setProperty("--sidebar-width", value + "px");
+
+  localStorage.setItem("sidebar-width", value);
+});
+
+document.addEventListener("mouseup", () => {
+  isResizingSidebar = false;
+  document.body.style.cursor = "default";
+});

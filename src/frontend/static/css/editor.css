@@ -54,6 +54,18 @@ html, body {
   padding-top: 10px;
   padding: 10px;
   border-right: 1px solid var(--background-1);
+  position: relative;
+}
+
+.sidebar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -10px;
+  width: 20px;
+  height: 100vh;
+  cursor: ew-resize;
+  z-index: 9999;
 }
 
 .sidebar-splitter {
@@ -221,4 +233,28 @@ input {
   text-overflow: ellipsis;
   text-align: center;
   padding: 5px;
+}
+
+.loading-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--background);
+  z-index: 99999;
+}
+
+.loading-menu.exiting {
+  animation: exit 0.25s linear forwards;
+}
+
+@keyframes exit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
